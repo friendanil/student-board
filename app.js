@@ -13,23 +13,17 @@ form.addEventListener('submit', (e) => {
     // console.log(formData)
     // console.log(fname)
 
-    // create student account
-    // https://apitest.boomconcole.com/api/auth/signup
-
-    const data = {
-        student_of_mentorfriends:{
-            fname,
-            lname,
-            email,
-            password
-        }
+    let data = {
+        fname,
+        lname,
+        email,
+        password
     }
 
-    createAccount(JSON.stringify(data))
-})
+    data = JSON.stringify(data)
 
-const createAccount = data => {
-    fetch(`https://apitest.boomconcole.com/api/createApiWithoutAuth`, {
+    // create student account / Signup
+    fetch(`https://apitest.boomconcole.com/api/auth/signup`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -39,12 +33,52 @@ const createAccount = data => {
     .then(res => res.json())
     .then(data => {
         // console.log(data)
+        const dataForCreate = {
+            student_of_mentorfriends:{
+                fname,
+                lname,
+                email,
+                password
+            }
+        }
+    
+        createAccount(JSON.stringify(dataForCreate))
+        // createAccount(dataForCreate)
+
+        form.reset()
+
+    })
+
+    
+})
+
+const createAccount = data => {
+    // data = JSON.parse(data)
+    console.log('createAccount', data)
+    fetch(`https://apitest.boomconcole.com/api/createApiWithAuth`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            "Access-Control-Allow-Origin" : "*", 
+            "Access-Control-Allow-Credentials" : true 
+        },
+        body: data,
+    })
+    .then(res => {
+        console.log('response', res)
+        res.json()
+    })
+    .then(data => {
+        console.log('account create!', data)
         form.reset()
         listAccount()
     })
+    .catch(err => {
+        console.log('error', err)
+    })
 }
 
-const listAccount = async (data) => {
+const listAccount = async () => {
     const studentData = []
     const response = await fetch(`https://apitest.boomconcole.com/api/list-api-clean?type=${typeKey}`)
         .then(response => response.json())
@@ -109,7 +143,7 @@ const loadData = data => {
     editInfo()
 }
 
-listAccount()
+// listAccount()
 
 const editInfo = () => {
     const infos = document.querySelectorAll('.student-info button')
