@@ -1,5 +1,54 @@
 const form = document.getElementById("form")
+const loginForm = document.getElementById('login-form')
 const typeKey = 'student_of_mentorfriends'
+let authToken = ''
+
+loginForm.addEventListener('submit', (e) => {
+    e.preventDefault()
+    // console.log('loginBtn clicked!')
+
+    const formData = new FormData(loginForm);
+    const loginEmail = formData.get('loginEmail')
+    const loginPassword = formData.get('loginPassword')
+
+    let data = {
+        email: loginEmail,
+        password: loginPassword
+    }
+
+    data = JSON.stringify(data)
+
+    // create student account / Signup
+    fetch(`https://apitest.boomconcole.com/api/auth/login`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: data,
+    })
+    .then(res => res.json())
+    .then(data => {
+        console.log('login', data)
+        authToken = data.data.token
+        console.log('authToken', authToken)
+
+        // const dataForCreate = {
+        //     details: {
+        //         student_of_mentorfriends:{
+        //             name: `${fname} ${lname}`,
+        //             email: email,
+        //         }
+        //     }
+        // }
+
+        // createAccount(JSON.stringify(dataForCreate))
+        // createAccount(dataForCreate)
+        listAccount()
+
+        loginForm.reset()
+    })
+
+})
 
 form.addEventListener('submit', (e) => {
     e.preventDefault()
@@ -33,39 +82,24 @@ form.addEventListener('submit', (e) => {
     .then(res => res.json())
     .then(data => {
         // console.log(data)
-        const dataForCreate = {
-            student_of_mentorfriends:{
-                fname,
-                lname,
-                email,
-                password
-            }
-        }
-    
-        createAccount(JSON.stringify(dataForCreate))
-        // createAccount(dataForCreate)
-
         form.reset()
-
     })
-
-    
 })
 
 const createAccount = data => {
     // data = JSON.parse(data)
     console.log('createAccount', data)
-    fetch(`https://apitest.boomconcole.com/api/createApiWithAuth`, {
+    fetch(`https://apitest.boomconcole.com/api/concepts`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
             "Access-Control-Allow-Origin" : "*", 
-            "Access-Control-Allow-Credentials" : true 
+            "Access-Control-Allow-Credentials" : true,
+            'Authorization': `Bearer ${authToken}`
         },
         body: data,
     })
     .then(res => {
-        console.log('response', res)
         res.json()
     })
     .then(data => {
@@ -201,20 +235,24 @@ const editCard = (form) => {
 
 const updateInfo = (info) => {
     console.log('info', info)
-    const data = {
-        "details": {
-            "id":100117967,
-            typeKey : {
-                "name": info.fullName,
-                "email": info.email,
-                "password": info.password,
-            }
+    const fname = info.fullName.split(' ')[0]
+    const lname = info.fullName.split(' ')[1]
+    let data = {
+        'student_of_mentorfriends': {
+            "id": info.id,
+            "fname": fname,
+            "lname": lname,
+            "email": info.email,
+            "password": info.password,
         }
     }
+
+    data = JSON.stringify(data)
     fetch(`https://apitest.boomconcole.com/api/concepts/update`, {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${authToken}`
         },
         body: data,
     })
